@@ -13,4 +13,12 @@ for k in range(K):
     X[idx] = np.c_[r * np.sin(t), r * np.cos(t)]
     Y[idx] = k
 
-plt.scatter(X[:, 0], X[:, 1])
+plt.scatter(X[:, 0], X[:, 1], c=Y, s=40, cmap=plt.cm.Spectral)
+plt.show()
+
+def softmax():
+    W = 0.01 * np.random.randn(D, K)
+    b = np.zeros(1, K)
+    scores = np.dot(X, W) + b
+    exp_scores = np.exp(scores)
+    probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
