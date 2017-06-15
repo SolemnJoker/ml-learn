@@ -13,9 +13,8 @@ myfont = fm.FontProperties(
     fname=matplotlib.font_manager.win32FontDirectory() + "/STXIHEI.TTF", size=14)
 matplotlib.rcParams["axes.unicode_minus"] = False
 
+
 #%%
-
-
 def simple_plot():
     """
     simple plot
@@ -42,7 +41,7 @@ def simple_plot():
     plt.plot(x, y_cos, "b--", linewidth=2.0, label="cos")
     plt.plot(x, y_sin, "g-", linewidth=2.0, label="sin")
     # 设置图例位置,loc可以为[upper, lower, left, right, center]
-    iplt.legend(loc="upper left", prop=myfont, shadow=True)
+    plt.legend(loc="upper left", prop=myfont, shadow=True)
     plt.show()
     return
 
