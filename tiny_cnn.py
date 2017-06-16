@@ -16,7 +16,7 @@ for k in range(K):
 plt.scatter(X[:, 0], X[:, 1], c=Y, s=40, cmap=plt.cm.Spectral)
 plt.show()
 
-def softmax():
+def softmax(X):
     W = 0.01 * np.random.randn(D, K)
     b = np.zeros(1, K)
     scores = np.dot(X, W) + b
