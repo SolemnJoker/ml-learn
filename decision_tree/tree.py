@@ -1,5 +1,6 @@
 #-*- coding: UTF-8 -*-
 from math import log
+import operator
 
 #计算香农熵
 def calShannonEnt(dataset):
@@ -34,6 +35,7 @@ def splitDataset(dataset,axis,value):
             retDataset.append(retFeatVec)
     return retDataset
 
+#选择最佳划分
 def chooseBestFeat2Split(dataset):
     bestFeat = -1
     bestInfoGain = 0.0
@@ -53,7 +55,33 @@ def chooseBestFeat2Split(dataset):
             bestFeat = i
     return bestFeat
 
-#test
-dataset,labels = createDataset()
-print chooseBestFeat2Split(dataset)
+#选择classlist中数量最多的类别
+def majorityCnt(classlist):
+    classCount = {}
+    for c in classlist:
+        classCount[c] = classCount.get(c,0) + 1
+    
+    sortClassCount = sorted(classCount.iteritems(),
+                     key = operator.itemgetter(1),reverse=True)
+    return sortClassCount[0][0]
+        
 
+#构建决策树
+def createTree(dataset,labels):
+    curLabels = labels[:]
+    classlist = [c[-1] for c in dataset]
+    if classlist.count(classlist[0]) == len(classlist):
+        return classlist[0]
+    if len(dataset[0]) == 1:
+        return majorityCnt(classlist)
+    bestFeat = chooseBestFeat2Split(dataset)
+    bestLabel = curLabels[bestFeat]
+    curTreeNode = {bestLabel:{}}
+    del(labels[bestFeat])
+    featlist = [f[bestFeat] for f in dataset]
+    uniqueFeatValue = set(featlist)
+    for value in uniqueFeatValue:
+        subLabels = curLabels[:]
+        curTreeNode[bestLabel][value] = createTree(
+            splitDataset(dataset,bestFeat,value),subLabels)
+    return curTreeNode
