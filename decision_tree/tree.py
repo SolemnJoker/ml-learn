@@ -1,6 +1,7 @@
 #-*- coding: UTF-8 -*-
 from math import log
 import operator
+import pickle
 
 # 计算香农熵
 
@@ -48,7 +49,6 @@ def chooseBestFeat2Split(dataset):
     bestFeat = -1
     bestInfoGain = 0.0
     featNum = len(dataset[0]) - 1
-    print 'featNum:',featNum
     baseEntropy = calShannonEnt(dataset)
     for i in range(featNum):
         featList = [X[i] for X in dataset]
@@ -98,7 +98,28 @@ def createTree(dataset, labels):
             splitDataset(dataset, bestFeat, value), subLabels)
     return curTreeNode
 
+#分类
+def classify(inTree,featLabel,featVec):
+    label = inTree.keys()[0]
+    featIndex = featLabel.index(label)
+    childs = inTree[label]
+    nextNode = childs.get(featVec[featIndex],'error')
+    if type(nextNode) == type({}):
+        result = classify(nextNode,featLabel,featVec) 
+    else:
+        result = nextNode
+    return result
 
+def storeTree(filename,inTree):
+    f = open(filename,'w')
+    pickle.dump(inTree,f)
+    f.close()
+
+def loadTree(filename):
+    return pickle.loads(filename)
+
+'''
 def createAtree():
     dataset, labels = createDataset()
     return createTree(dataset, labels)
+'''

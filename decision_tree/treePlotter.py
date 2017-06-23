@@ -97,6 +97,8 @@ def createPlot(inTree):
     plotTree(inTree, (0.0, 1.0),(0.0,1.0), '')
     plt.show()
 
+'''
 tree = t.createAtree();
 print tree
 createPlot(tree)
+'''
