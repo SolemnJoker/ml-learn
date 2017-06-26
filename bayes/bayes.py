@@ -25,21 +25,14 @@ def word2vec(vocablist,inputSet):
             pass
     return ret
 
-def createTrainMat(postinglist):
-    vocablist = createVocablist(postinglist)
-    trainMat = []
-    for postDoc in postinglist:
-        trainMat.append(word2vec(vocablist,postDoc))
-    return trainMat
-
 def trainNB0(trainMat,classlist):
     numTrainDocs = len(trainMat)
     pAbusive = sum(classlist)/float(numTrainDocs)
     docLen = len(trainMat[0])
-    perWordNum0 = zeros(docLen)
-    perWordNum1 = zeros(docLen)
-    totalWord0  = 0.0
-    totalWord1  = 0.0
+    perWordNum0 = ones(docLen)
+    perWordNum1 = ones(docLen)
+    totalWord0  = 2.0
+    totalWord1  = 2.0
     for i in range(numTrainDocs):
         if classlist[i] == 1:
             perWordNum1 += trainMat[i]
@@ -48,7 +41,27 @@ def trainNB0(trainMat,classlist):
             perWordNum0 += trainMat[i]
             totalWord0  += sum(trainMat[i])
  
-    p1Vec = perWordNum1/totalWord1
-    p0Vec = perWordNum0/totalWord0
+    p1Vec = log(perWordNum1/totalWord1)
+    p0Vec = log(perWordNum0/totalWord0)
     return p0Vec,p1Vec,pAbusive
+
+def classifyNB(inputVec,p0Vec,p1Vec,pClass1):
+    inputArray =array(inputVec) 
+    p1 = sum(inputArray * p1Vec) + pClass1
+    p0 = sum(inputArray * p0Vec) + 1 - pClass1
+    if p1 > p0:return 1
+    else:return 0
+
+def testNB():
+    postingList,classlist=loadDataSet()
+    vocablist = createVocablist(postingList)
+    trainMat = []
+    for postDoc in postingList:
+        trainMat.append(word2vec(vocablist,postDoc))
+    p0Vec,p1Vec,pAbusive = trainNB0(trainMat,classlist)
+
+    testInput = word2vec(vocablist,['love','my','daltation'])
+    print testInput,'classify:',classifyNB(testInput,p0Vec,p1Vec,pAbusive)
+    testInput = word2vec(vocablist,['stupid','garbege'])
+    print testInput,'classify:',classifyNB(testInput,p0Vec,p1Vec,pAbusive)
 
