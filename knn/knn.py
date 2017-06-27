@@ -51,7 +51,7 @@ def normal(dataset):
     
 #测试
 def knn_doses():
-    dataset,labels = file2matrix(os.path.dirname(__file__) +'/datingTestSet.txt')
+    dataset,labels = file2matrix(os.curdir +'/datingTestSet.txt')
     dataset = normal(dataset)
     data_size = dataset.shape[0]
     test_data = dataset[0:data_size/10:1,0:]
