@@ -33,16 +33,20 @@ def stocGradAscent0(dataSet,labels):
     weights =ones(s[1])
     for i in range(s[0]):
         h = simgoid(dataMat[i]*weights)
-        error = labelMat - h
-        weights = weights + alpha*dataMat.transpose()*error
+        error = labelMat[i] - h
+        weights = weights + alpha*dataMat[i]*error
     return weights
  
-def stocGradAscent1(dataSet,labels):
+def stocGradAscent1(dataSet,labels,numInter = 150):
     s=shape(dataSet)
     weights =ones(s[1])
-    for i in range(s[0]):
-        h = simgoid(dataMat[i]*weights)
-        error = labelMat - h
-        weights = weights + alpha*dataMat.transpose()*error
+    for j in range(numInter):
+        dataIndex = range(s[0]) 
+        for i in range(s[0]):
+            randIndex = int(random.uniform(0,s[0]))
+            h = simgoid(dataMat[randIndex]*weights)
+            error = labelMat[randIndex] - h
+            weights = weights + alpha*dataMat[randIndex]*error
+            del(dataIndex[randIndex])
     return weights
  
