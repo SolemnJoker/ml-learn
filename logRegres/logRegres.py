@@ -27,4 +27,22 @@ def gradAscent(dataSet,labels):
         error = labelMat - h
         weights = weights + alpha*dataMat.transpose()*error
     return weights
-        
+
+def stocGradAscent0(dataSet,labels):
+    s=shape(dataSet)
+    weights =ones(s[1])
+    for i in range(s[0]):
+        h = simgoid(dataMat[i]*weights)
+        error = labelMat - h
+        weights = weights + alpha*dataMat.transpose()*error
+    return weights
+ 
+def stocGradAscent1(dataSet,labels):
+    s=shape(dataSet)
+    weights =ones(s[1])
+    for i in range(s[0]):
+        h = simgoid(dataMat[i]*weights)
+        error = labelMat - h
+        weights = weights + alpha*dataMat.transpose()*error
+    return weights
+ 
