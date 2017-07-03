@@ -1,4 +1,7 @@
+#-*- coding: UTF-8 -*-
+
 from numpy import *
+import matplotlib.pyplot as plt
 import os
 import matplotlib.pylab as plt
 
@@ -44,8 +47,46 @@ def plotBestFit(dataset,labels,weights):
     ax.plot(x,y)
     plt.show()
 
+
+        
+def stocGradAscent0(dataSet,labels):
+    dataSet = array(dataSet)
+    s=shape(dataSet)
+    weights =ones(s[1])
+    alpha = 0.01
+    for i in range(s[0]):
+        h = simgoid((dataSet[i]*weights))
+        error = labels[i] - h
+        print i,s,dataSet[i]*error,error
+        weights = weights + alpha*dataSet[i]*error
+    return weights
+ 
+def stocGradAscent1(dataSet,labels,numInter = 150):
+    dataSet = array(dataSet)
+    s=shape(dataSet)
+    weights =ones(s[1])
+    for j in range(numInter):      
+        dataIndex = range(s[0]) 
+        for i in range(s[0]):
+            randIndex = int(random.uniform(0,len(dataIndex)))
+            h = simgoid(sum(dataSet[randIndex]*weights))
+            alpha = 4/(1.0+i+j) + 0.01
+            error = labels[randIndex] - h
+            weights = weights + alpha*dataSet[randIndex]*error
+            print len(dataIndex),randIndex
+            del(dataIndex[randIndex])
+    return weights
+
+
 dataSet,labels = loadData()
 weights = gradAscent(dataSet,labels)
 plotBestFit(dataSet,labels,weights)
 
-        
+weights = stocGradAscent0(dataSet,labels)
+plotBestFit(dataSet,labels,weights)
+
+weights = stocGradAscent1(dataSet,labels)
+plotBestFit(dataSet,labels,weights)
+
+
+
