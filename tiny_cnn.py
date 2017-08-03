@@ -22,3 +22,4 @@ def softmax(X):
     scores = np.dot(X, W) + b
     exp_scores = np.exp(scores)
     probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+    
