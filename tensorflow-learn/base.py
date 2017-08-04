@@ -1,12 +1,9 @@
-<<<<<<< HEAD
-import tensorflow as tf
-
-def hello():
-    tf.consta
-=======
 #coding:utf-8
 import tensorflow as tf
+import 
 
+#constant常量
+#
 def tensor():
     a = tf.constant([1.0,2.0],name='a')
     b = tf.constant([2.0,3.0],name='b')
@@ -46,6 +43,7 @@ def variable():
             print "update:",sess.run(update)
             print "state:",sess.run(state)
         
+#一个会话多个计算和取回
 def fetch():
     input1 = tf.constant(1.)
     input2 = tf.constant(3.)
@@ -57,6 +55,7 @@ def fetch():
         res = sess.run([mul,add])
         print res
     
+#使用placeholder占位符
 def feed():
     input1 = tf.placeholder(tf.float32)
     input2 = tf.placeholder(tf.float32)
@@ -66,6 +65,6 @@ def feed():
     
 
 
+
     
     
->>>>>>> e3585666becf5e9ad316b260375f85ce47e43712
