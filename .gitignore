@@ -1,1 +1,4 @@
-/decision_tree/*.pyc
+*.pyc
+*.vscode
+launch.json
+settings.json
