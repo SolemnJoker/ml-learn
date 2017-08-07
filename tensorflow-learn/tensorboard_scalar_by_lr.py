@@ -1,4 +1,7 @@
 #coding:utf-8
+#展示如何使用tensorboar scalar绘制训练过程
+#控制台:tensorboard --logdir="./my_graph" #启动tensorboard服务，会使用6006端口
+#浏览器:http://localhost:6006 #最好用chrome，点击顶部graph看到数据流图
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
@@ -24,26 +27,38 @@ def train(trainX,trainY):
     #也可以loss = tf.reduce_sum(tf.squared_difference(Y , Y_pred))
 
     #正则化
-    loss += 1e-6*tf.global_norm([W])
+    loss = loss + 1e-6*tf.global_norm([W])
 
     trainOp = tf.train.GradientDescentOptimizer(0.001).minimize(loss)
 
 
-    epochs = 1000
+    epochs = 1000 
     fig, ax = plt.subplots(1, 1)
     ax.scatter(trainX,trainY)
     fig.show()
     plt.draw()
     with tf.Session() as sess:
+        #tensorboard:添加变量到summary中
+        tf.summary.scalar("w",W)
+        tf.summary.scalar("b",B)
+        #tensorboard:merge summary
+        merge = tf.summary.merge_all()
+        #tensorboard:创建writer
+        writer = tf.summary.FileWriter("./linear", sess.graph)
         sess.run(tf.initialize_all_variables())
         epoch = 0
         for epoch in range(epochs):
             t,w,b = sess.run([trainOp,W,B],feed_dict={X:trainX,Y:trainY})
+            if epoch % 50 == 0:
+                #tensorboard:绘制东西也要sess.run,将返回的Result（summary类型）添加到writer中
+                result = sess.run(merge,feed_dict={X:trainX,Y:trainY})
+                writer.add_summary(result,epoch)
             print("step:{},w:{},b:{}".format(epoch,w,b))
 
 
 
     print("final:W:{},b:{}".format(w,b))
+    writer.close()
     ax.plot(trainX,trainX*w + b)
     plt.show()
 
