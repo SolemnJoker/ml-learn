@@ -8,6 +8,8 @@ def createData(W,b):
     return X,Y
 
 def train(trainX,trainY):
+    #X = tf.placeholder(tf.float32,shape = trainX.shape) 默认shape=None表示任意类型
+    #Y = tf.placeholder(tf.float32,shape = trainY.shape)
     X = tf.placeholder(tf.float32)
     Y = tf.placeholder(tf.float32)
     
@@ -23,9 +25,9 @@ def train(trainX,trainY):
     #正则化
     loss = loss + 1e-6*W*W
 
-    trainOp = tf.train.GradientDescentOptimizer(0.01).minimize(loss)
+    trainOp = tf.train.GradientDescentOptimizer(0.0001).minimize(loss)
 
-    epochs = 300 
+    epochs = 1000 
     fig, ax = plt.subplots(1, 1)
     ax.scatter(trainX,trainY)
     fig.show()
@@ -34,8 +36,7 @@ def train(trainX,trainY):
         epoch = 0
         sess.run(tf.initialize_all_variables())
         for epoch in range(epochs):
-            for (x,y) in zip(trainX,trainY):
-                t,w,b = sess.run([trainOp,W,B],feed_dict={X:x,Y:y})
+            t,w,b = sess.run([trainOp,W,B],feed_dict={X:trainX,Y:trainY})
             print("step:{},w:{},b:{}".format(epoch,w,b))
 
     print("final:W:{},b:{}".format(w,b))
