@@ -32,7 +32,7 @@ def softmax(X):
         exp_scores = np.exp(scores)
         probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
 
-         # 计算损失loss(包括互熵损失和正则化部分)结果为N x 1数组
+        # 计算损失loss(包括互熵损失和正则化部分)结果为N x 1数组
         corect_logprobs = -np.log(probs[range(num_examples),Y])
         data_loss = np.sum(corect_logprobs)/num_examples
         reg_loss = 0.5*reg*np.sum(W*W)
