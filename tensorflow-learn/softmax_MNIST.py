@@ -33,20 +33,27 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction,tf.float32))
 
 W_ = np.zeros([pix_num,label_num])
 b_ = np.zeros([label_num])
-bacth_size = 50
+batch_size = 50
 with tf.Session() as sess:
-    sess.run(tf.initialize_variables())
+    sess.run(tf.global_variables_initializer())
     for epoch in range(10):
-        for i in range(mnist.train.num_examples/bacth_size):
-            bacth = mnist.train.next_bacth(bacth_size)
-            sess.run([train_op,W,b],feed_dict={X:bacth[0],Y:bacth[1]})
+        for i in range(int(mnist.train.num_examples/batch_size)):
+            batch = mnist.train.next_batch(batch_size)
+            sess.run([train_op,W,b],feed_dict={X:batch[0],Y:batch[1]})
         
         print(sess.run(accuracy,feed_dict={X:mnist.test.images,Y:mnist.test.labels}))
         sys.stdout.flush()
     
     print(sess.run(accuracy,feed_dict={X:mnist.test.images,Y:mnist.test.labels}))
-    bacth = mnist.train.next_bacth(1)
-    print(sess.run([train_op,W,b],feed_dict={X:bacth[0],Y:bacth[1]}))
+    batch = mnist.train.next_batch(1)
+    W_,b_=sess.run([W,b],feed_dict={X:batch[0],Y:batch[1]})
+    print(W_,W_.shape)
     sys.stdout.flush()
+    #将每个w画出来，此处跟softmax无关
+    plt.figure(1)
+    for i in range(10):
+        p = plt.subplot(3,4,i+1)
+        p.imshow(np.reshape(W_[:,i], (28, 28)), cmap='gray')
+    plt.show()
     
     
