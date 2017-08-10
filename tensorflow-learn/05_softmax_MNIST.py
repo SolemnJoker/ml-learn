@@ -10,6 +10,7 @@ print("data num",mnist.train.num_examples,
       mnist.validation.num_examples)
 print("image shape:",mnist.train.images.shape)
 print("label shape:",mnist.train.labels.shape)
+print("label shape:",mnist.train.labels[1])
 
 #plt.imshow(np.reshape(mnist.train.images[100, :], (28, 28)), cmap='gray')
 pix_num = mnist.train.images.shape[1]
