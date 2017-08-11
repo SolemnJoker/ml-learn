@@ -1,3 +1,4 @@
+#coding:utf-8
 import tensorflow as tf
 import tensorflow.examples.tutorials.mnist.input_data as input_data
 import numpy as np
@@ -9,7 +10,7 @@ def weight_variable(shape):
     #从截断的正态分布中输出随机值
     #shape:[filter_height, filter_width, in_channels, out_channels]
     #[卷积核的高度，卷积核的宽度，图像通道数，卷积核个数]
-    inital = tf.truncated_normal(shape)
+    inital = tf.truncated_normal(shape,stddev=0.1)
     return tf.Variable(inital)
 
 #初始化权重b
@@ -87,15 +88,14 @@ print("start")
 sys.stdout.flush()
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    for epoch in range(10):
-        for i in range(int(mnist.train.num_examples/batch_size)):
-            sys.stdout.flush()
-            batch = mnist.train.next_batch(batch_size)
-            sess.run([train_op],feed_dict={X:batch[0],Y:batch[1],keep_prob:0.5})
+    for epoch in range(20000):
+        batch = mnist.train.next_batch(batch_size)
+        sess.run([train_op],feed_dict={X:batch[0],Y:batch[1],keep_prob:0.5})
         
-        batch = mnist.test.next_batch(1000)
-        print(sess.run(accuracy,feed_dict={X:batch[0],Y:batch[1],keep_prob:1.0}))
-        sys.stdout.flush()
+        if(epoch % 10 == 0):
+            batch = mnist.test.next_batch(1000)
+            print("step:",epoch,",rate:",sess.run(accuracy,feed_dict={X:batch[0],Y:batch[1],keep_prob:1.0}))
+            sys.stdout.flush()
     
     batch = mnist.test.next_batch(1000)
     print(sess.run(accuracy,feed_dict={X:batch[0],Y:batch[1],keep_prob:1.0}))
