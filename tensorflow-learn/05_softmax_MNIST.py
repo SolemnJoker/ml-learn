@@ -37,7 +37,7 @@ b_ = np.zeros([label_num])
 batch_size = 50
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    for epoch in range(10):
+    for epoch in range(30):
         for i in range(int(mnist.train.num_examples/batch_size)):
             batch = mnist.train.next_batch(batch_size)
             sess.run([train_op,W,b],feed_dict={X:batch[0],Y:batch[1]})
