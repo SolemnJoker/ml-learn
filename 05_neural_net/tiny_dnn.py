@@ -25,10 +25,10 @@ def train(X,Y):
     W2 = 0.01*np.random.randn(h,K)
     b2 = np.zeros((1,K))
  
-    step = 1
-    reg = 0.01
+    step = 0.1
+    reg = 0.0002
     num = X.shape[0]
-    for i in range(20000):
+    for i in range(30000):
         h1 = np.maximum(0,np.dot(X,W) + b)
         scores = np.dot(h1,W2) + b2
 
