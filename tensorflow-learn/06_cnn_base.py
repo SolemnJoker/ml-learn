@@ -4,6 +4,7 @@ import tensorflow.examples.tutorials.mnist.input_data as input_data
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import time
 
 #初始化权重w,这里也是卷积核(filter)
 def weight_variable(shape):
@@ -74,7 +75,7 @@ Y_prev = tf.nn.softmax(tf.matmul(h_fc1_drop,w_fc2) + b_fc2)
 #训练
 loss = -tf.reduce_sum(Y*tf.log(Y_prev))
 
-train_op = tf.train.GradientDescentOptimizer(0.001).minimize(loss)
+train_op = tf.train.GradientDescentOptimizer(0.0005).minimize(loss)
 
 #correct_prediction得到的是一个bool数组[True,False,True....]
 correct_prediction = tf.equal(tf.argmax(Y_prev,1),tf.arg_max(Y,1))
@@ -86,16 +87,19 @@ b_ = np.zeros([label_num])
 batch_size = 50
 print("start")
 sys.stdout.flush()
+t = time.clock()
 with tf.Session() as sess:
-    sess.run(tf.global_variables_initializer())
-    for epoch in range(20000):
-        batch = mnist.train.next_batch(batch_size)
-        sess.run([train_op],feed_dict={X:batch[0],Y:batch[1],keep_prob:0.5})
-        
-        if(epoch % 10 == 0):
-            batch = mnist.test.next_batch(1000)
-            print("step:",epoch,",rate:",sess.run(accuracy,feed_dict={X:batch[0],Y:batch[1],keep_prob:1.0}))
-            sys.stdout.flush()
+    with tf.device("/gpu:0"):
+        sess.run(tf.global_variables_initializer())
+        for epoch in range(20000):
+            batch = mnist.train.next_batch(batch_size)
+            sess.run([train_op],feed_dict={X:batch[0],Y:batch[1],keep_prob:0.5})
+
+            if(epoch % 10 == 0):
+                batch = mnist.test.next_batch(1000)
+                print("step:{} ,rate:{}, time:{}".format(epoch,sess.run(accuracy,feed_dict={X:batch[0],Y:batch[1],keep_prob:1.0}),time.clock() - t))
+                t = time.clock()
+                sys.stdout.flush()
     
     batch = mnist.test.next_batch(1000)
     print(sess.run(accuracy,feed_dict={X:batch[0],Y:batch[1],keep_prob:1.0}))

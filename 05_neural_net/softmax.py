@@ -2,25 +2,27 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 N = 100
 K = 3
 D = 2
-X = np.zeros((N * K, D))
-Y = np.zeros(N * K, dtype='uint8')
-reg = 1e-3
-step_size = 1
+ 
+
 
 def createData():
+    X = np.zeros((N * K, D))
+    Y = np.zeros(N * K, dtype='uint8')
     for k in range(K):
         idx = range(N * k, N * (k + 1))
         r = np.linspace(0.0, 1.0, N)
         t = np.linspace(4 * k, (k + 1) * 4, N) + np.random.randn(N) * 0.2
         X[idx] = np.c_[r * np.sin(t), r * np.cos(t)]
         Y[idx] = k
+    return X,Y
 
 
-def softmax(X):
+def softmax(X,Y):
+    reg = 1e-3
+    step_size = 1
     for i in range(200):
         num_examples = X.shape[0]
         W = 0.01 * np.random.randn(D, K)
@@ -55,7 +57,7 @@ def softmax(X):
 
     return W,b
 
-def show(W,b):
+def show(X,Y,W,b):
     h = 0.02
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
@@ -66,12 +68,12 @@ def show(W,b):
     Z = Z.reshape(xx.shape)
     fig = plt.figure()
     plt.contourf(xx, yy, Z, cmap=plt.cm.Spectral, alpha=0.8)
-    plt.scatter(X[:, 0], X[:, 1], c=Y, s=40, cmap=plt.cm.Spectral)
+    plt.scatter(X[:, 0], X[:, 1], c=Y, s=10, cmap=plt.cm.Spectral)
     plt.xlim(xx.min(), xx.max())
     plt.ylim(yy.min(), yy.max())
 
     plt.show()
 
-createData()
-W,b = softmax(X)
-show(W,b)
+X,Y = createData()
+W,b = softmax(X,Y)
+show(X,Y,W,b)
