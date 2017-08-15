@@ -23,26 +23,41 @@ def createData():
 def train(x,y):
     print(x.shape)
     print(y.shape)
+    #labels不是one hot类型标签，用tf.one_hot转换为one_hot标签
+    #注意转换后是tensor类型不能作为feed_dict的feed
+    y_onehot = tf.one_hot(y,depth=3) 
+    print(y_onehot)
     h1_num = 100
     X = tf.placeholder(tf.float32,shape=x.shape,name='x')
-    Y = tf.placeholder(tf.float32,shape=y.shape,name='y')
+    Y = tf.placeholder(tf.float32,shape=y_onehot.shape,name='y')
+
+    keep_prob = tf.placeholder(tf.float32)
     w1 = tf.Variable(tf.truncated_normal([D,h1_num]),dtype=tf.float32)
     b1 = tf.Variable(tf.zeros([1,h1_num]),dtype=tf.float32)
     w2 = tf.Variable(tf.truncated_normal([h1_num,K]),dtype=tf.float32)
     b2 = tf.Variable(tf.zeros([1,K]),dtype=tf.float32)
  
-    h1 = tf.nn.relu(tf.matmul(X,w1)+b1)
-    Y_pred_k = tf.nn.softmax(tf.matmul(h1,w2)+b2)
-    Y_pred = tf.arg_max(Y_pred_k,dimension=1)
-   
-    loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=Y_pred,labels=Y))
-    loss += 1e-6*(tf.global_norm([w1])+tf.global_norm(w2))
-    train_op = tf.train.GradientDescentOptimizer(1).minimize(loss)
+    h1 = tf.nn.relu(tf.matmul(X,w1)+b1)                 #隐层
+    h_1_drop = tf.nn.dropout(h1,keep_prob)              #dropout层
+    Y_prev = tf.nn.softmax(tf.matmul(h_1_drop,w2)+b2)
+
+    loss = -tf.reduce_sum(Y*tf.log(Y_prev)) # + 1e-6*tf.global_norm([w2,w1])
+    train_op = tf.train.GradientDescentOptimizer(0.001).minimize(loss)
+ 
+    correct_prediction = tf.equal(tf.argmax(Y_prev,1),tf.arg_max(Y,1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction,tf.float32))
 
     with tf.Session() as sess:
-        sess.run(tf.initialize_all_variables())
-        for epoch in 20000:
-            sess.run(train_op,feed_dict={X:x,Y:y})
+        sess.run(tf.global_variables_initializer())
+
+        #y_onehot是tensor类型不能作为feed_dict的feed
+        y_r = sess.run(y_onehot)
+        for epoch in range(1000):
+            sess.run(train_op,feed_dict={X:x,Y:y_r,keep_prob:0.8})
+            if epoch % 100 == 0:
+                print(epoch,sess.run(accuracy,feed_dict={X:x,Y:y_r,keep_prob:1.0}))
+                sys.stdout.flush()
+ 
 
 
         W1,B1,W2,B2 = sess.run([w1,b1,w2,b2])
