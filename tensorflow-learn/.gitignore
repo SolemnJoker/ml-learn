@@ -3,4 +3,6 @@
 launch.json
 setting.json
 *.JK
+checkpoints
+checkpoints*
 
