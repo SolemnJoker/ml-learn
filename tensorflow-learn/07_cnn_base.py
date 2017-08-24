@@ -84,7 +84,7 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction,tf.float32))
 
 W_ = np.zeros([pix_num,label_num])
 b_ = np.zeros([label_num])
-batch_size = 50
+batch_size = 8 
 print("start")
 sys.stdout.flush()
 t = time.clock()

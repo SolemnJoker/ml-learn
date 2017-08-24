@@ -67,7 +67,7 @@ def plotBestFit(dataset,labels,weights):
     ax.plot(x,y)
     plt.show()
 
-data,labels = loaddata(os.path.dirname(__file__) +"/logistic_regression_test_data.txt")
+data,labels = loaddata(os.path.dirname(__file__) +"\\04_logistic_regression_test_data.txt")
 weights = train(data,labels)
 print(weights)
 sys.stdout.flush()

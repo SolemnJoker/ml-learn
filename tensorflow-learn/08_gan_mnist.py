@@ -4,10 +4,12 @@ import numpy as np
 import sys
 import time
 import pickle
+import matplotlib.pyplot as plt
+
 
 def get_inputs(real_img_size,noise_size):
-    real_img = tf.placeholder(tf.float32,[None,real_img_size])
-    noise_img = tf.placeholder(tf.float32,[None,noise_size])
+    real_img = tf.placeholder(tf.float32,[None,real_img_size],name="real_image")
+    noise_img = tf.placeholder(tf.float32,[None,noise_size],name="noise_image")
     return real_img,noise_img
 
 def get_discriminator(img,num_h,reuse=False,alpha=0.01):
@@ -18,12 +20,12 @@ def get_discriminator(img,num_h,reuse=False,alpha=0.01):
     alpha:leaky ReLU系数
     '''
     with tf.variable_scope("discriminator",reuse=reuse):
-        h = tf.layers.dense(img,num_h)
+        h = tf.layers.dense(img,num_h,name="hidden_layer")
         #Leaky ReLU系数
         h = tf.maximum(alpha*h,h)
 
-        logits = tf.layers.dense(h,1)
-        outputs = tf.sigmoid(logits)
+        logits = tf.layers.dense(h,1,name="logits")
+        outputs = tf.sigmoid(logits,name="output")
         return logits,outputs
 
 def get_generator(noise_data,n_units,out_dim,reuse=False,alpha=0.01):
@@ -35,12 +37,12 @@ def get_generator(noise_data,n_units,out_dim,reuse=False,alpha=0.01):
     alpha:leaky ReLU系数
     '''
     with tf.variable_scope("generator",reuse=reuse):
-        hidden1 = tf.layers.dense(noise_data,n_units)
+        hidden1 = tf.layers.dense(noise_data,n_units,name="hidden_layer")
         hidden1 = tf.maximum(alpha*hidden1,hidden1)
 
         hidden1 = tf.layers.dropout(hidden1,rate=0.2)
 
-        logits = tf.layers.dense(hidden1,out_dim)
+        logits = tf.layers.dense(hidden1,out_dim,name="logits")
         outputs = tf.tanh(logits)
         return logits,outputs
 
@@ -53,7 +55,7 @@ g_units = 128
 d_units = 128
 #leaky ReLU参数
 alpha=0.01
-learning_rate=0.005
+learning_rate=0.0005
 #label smoothing??
 smooth=0.1
 
@@ -100,7 +102,7 @@ d_train_op = tf.train.AdamOptimizer(learning_rate).minimize(d_loss,var_list=d_va
 g_train_op = tf.train.AdamOptimizer(learning_rate).minimize(g_loss,var_list=g_var)
 
 #训练
-batch_size = 50
+batch_size = 100
 epochs = 300
 n_sample = 25
 samples = []
@@ -109,6 +111,16 @@ saver = tf.train.Saver(var_list=g_var)
 
 with tf.Session() as sess:
     with tf.device("/cpu:0"):
+        #tensorboard:添加变量到summary中
+        tf.summary.scalar("d_loss_real",d_loss_real)
+        tf.summary.scalar("d_loss_fake",d_loss_fake)
+        tf.summary.scalar("d_loss",d_loss)
+        tf.summary.scalar("g_loss",g_loss)
+        #tensorboard:merge summary
+        merge = tf.summary.merge_all()
+        #tensorboard:创建writer
+        writer = tf.summary.FileWriter("./gan_mnist", sess.graph)
+ 
         start_time = time.clock()
         sess.run(tf.global_variables_initializer())
         for e in range(epochs):
@@ -122,19 +134,23 @@ with tf.Session() as sess:
                 sess.run(d_train_op,feed_dict={real_img:batch_images,noise_data:batch_noise})
                 sess.run(g_train_op,feed_dict={noise_data:batch_noise})
 
+
             train_loss_d = sess.run(d_loss,feed_dict={real_img:batch_images,
                 noise_data:batch_noise})
-            train_loss_d_real = sess.run(d_logits_real,feed_dict={
+            train_loss_d_real = sess.run(d_loss_real,feed_dict={
                 real_img:batch_images,noise_data:batch_noise})
-            train_loss_d_fake = sess.run(d_logits_fake,feed_dict={
+            train_loss_d_fake = sess.run(d_loss_fake,feed_dict={
                 real_img:batch_images,noise_data:batch_noise})
 
             train_loss_g = sess.run(g_loss,feed_dict={noise_data:batch_noise})
-
+            result = sess.run(merge,feed_dict={real_img:batch_images,
+                noise_data:batch_noise})
+            writer.add_summary(result,e)
+ 
 
             print("Epoch {}/{}...".format(e+1, epochs),
-                  "Discriminator Loss: {:.4f}...".format(train_loss_d),
-                  "Generator Loss: {:.4f}".format(train_loss_g))    
+              "Discriminator Loss: {:.4f}(Real: {:.4f} + Fake: {:.4f})...".format(train_loss_d, train_loss_d_real, train_loss_d_fake),
+              "Generator Loss: {:.4f}".format(train_loss_g))
             sys.stdout.flush()
             # 记录各类loss值
             losses.append((train_loss_d, train_loss_d_real, train_loss_d_fake, train_loss_g))
@@ -159,6 +175,7 @@ with open('train_samples.pkl', 'wb') as f:
     pickle.dump(samples, f)
  
 fig, ax = plt.subplots(figsize=(20,7))
+print(losses)
 losses = np.array(losses)
 plt.plot(losses.T[0], label='Discriminator Total Loss')
 plt.plot(losses.T[1], label='Discriminator Real Loss')
@@ -185,6 +202,24 @@ def view_samples(epoch, samples):
 
 _ = view_samples(-1, samples) # 显示最后一轮的outputs
 
+# 指定要查看的轮次
+epoch_idx = [0, 5, 10, 20, 40, 60, 80, 100, 150, 250] # 一共300轮，不要越界
+show_imgs = []
+for i in epoch_idx:
+    show_imgs.append(samples[i][1])
+
+# 指定图片形状
+rows, cols = 10, 25
+fig, axes = plt.subplots(figsize=(30,12), nrows=rows, ncols=cols, sharex=True, sharey=True)
+
+idx = range(0, epochs, int(epochs/rows))
+
+for sample, ax_row in zip(show_imgs, axes):
+    for img, ax in zip(sample[::int(len(sample)/cols)], ax_row):
+        ax.imshow(img.reshape((28,28)), cmap='Greys_r')
+        ax.xaxis.set_visible(False)
+        ax.yaxis.set_visible(False)
+plt.show()
 
 
 
