@@ -76,19 +76,16 @@ reuse=True)
 # tf.ones_like生成和tensor shape一样的全为1的tensor，zero_like同理
 # 'tensor' is [[1, 2, 3], [4, 5, 6]] 
 #  tf.ones_like(tensor) ==> [[1, 1, 1], [1, 1, 1]]
-d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits (
-     logits=d_logits_real,labels=tf.ones_like(d_logits_real))*(1-smooth))
+d_loss_real = tf.reduce_mean(tf.log(d_outputs_real)) *(1-smooth)
 
 #生成图片loss
-d_loss_fake =tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits (
-    logits=d_logits_fake,labels=tf.zeros_like(d_logits_fake))*(1-smooth))
+d_loss_fake =tf.reduce_mean(tf.log(1-d_outputs_fake))*(1-smooth)
 
 #总的discriminator loss
-d_loss = d_loss_fake  + d_loss_real
+d_loss = -(d_loss_fake +  d_loss_real)
 
 #generator loss
-g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=
-d_logits_fake,labels=tf.ones_like(d_logits_fake)) *(1-smooth))
+g_loss = -tf.reduce_mean(tf.log(d_outputs_fake)) *(1-smooth)
 
 
 #Optimizer
