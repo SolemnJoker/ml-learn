@@ -1,3 +1,4 @@
+#coding:utf-8
 import tensorflow as tf
 import tensorflow.examples.tutorials.mnist.input_data as input_data
 import numpy as np
@@ -47,7 +48,7 @@ def get_generator(noise_data,n_units,out_dim,reuse=False,alpha=0.01):
         return logits,outputs
 
 #训练用的参数    
-mnist = input_data.read_data_sets("/MNIST_data",one_hot=True)
+mnist = input_data.read_data_sets("./MNIST_data",one_hot=True)
 img_size = mnist.train.images[0].shape[0]
 #噪声数据大小
 noise_size = 100
