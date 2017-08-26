@@ -3,6 +3,8 @@
 launch.json
 setting.json
 *.JK
-checkpoints
+./checkpoints/
 checkpoints*
+gan_mnist
+MNIST_data
 

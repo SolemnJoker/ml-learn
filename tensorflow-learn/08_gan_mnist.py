@@ -202,7 +202,7 @@ def view_samples(epoch, samples):
 _ = view_samples(-1, samples) # 显示最后一轮的outputs
 
 # 指定要查看的轮次
-epoch_idx = [0, 5, 10, 20, 40, 60, 80, 100, 150, 250] # 一共300轮，不要越界
+epoch_idx = [0, 5, 10, 20, 40, 60, 80]#100, 150, 250] # 一共300轮，不要越界
 show_imgs = []
 for i in epoch_idx:
     show_imgs.append(samples[i][1])
