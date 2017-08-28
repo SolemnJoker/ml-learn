@@ -85,7 +85,7 @@ d_loss = -(d_loss_fake +  d_loss_real)
 
 #generator loss = 1/m * Σ(log(1-D(G())))
 #这里使用-log(D(G()))替代原公式是为了在训练初期加大梯度信息
-g_loss = tf.reduce_mean(tf.log(1-d_outputs_fake)) *(1-smooth)
+g_loss = -tf.reduce_mean(tf.log(d_outputs_fake)) *(1-smooth)
 
 
 #Optimizer
