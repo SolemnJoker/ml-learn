@@ -54,7 +54,7 @@ g_units = 128
 d_units = 128
 #leaky ReLU参数
 alpha=0.01
-learning_rate=0.0015
+learning_rate=0.0005
 #label smoothing??
 smooth=0.1
 
@@ -100,7 +100,7 @@ g_train_op = tf.train.AdamOptimizer(learning_rate).minimize(g_loss,var_list=g_va
 
 #训练
 batch_size = 50
-epochs = 300
+epochs = 500
 n_sample = 25
 samples = []
 losses = []
@@ -185,7 +185,7 @@ def view_samples(epoch, samples):
 _ = view_samples(-1, samples) # 显示最后一轮的outputs
 
 # 指定要查看的轮次
-epoch_idx = [0, 5, 10, 20, 40, 60, 80, 100, 150, 250] # 一共300轮，不要越界
+epoch_idx = [0, 5, 10, 20, 40, 60, 80, 100, 150, 250,300,400,450] # 一共300轮，不要越界
 show_imgs = []
 for i in epoch_idx:
     show_imgs.append(samples[i])
