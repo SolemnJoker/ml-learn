@@ -6,7 +6,6 @@ import time
 import pickle
 import matplotlib.pyplot as plt
 
-
 def get_inputs(real_img_size,noise_size):
     real_img = tf.placeholder(tf.float32,[None,real_img_size],name="real_image")
     noise_img = tf.placeholder(tf.float32,[None,noise_size],name="noise_image")
@@ -26,7 +25,7 @@ def get_discriminator(img,num_h,reuse=False,alpha=0.01):
 
         logits = tf.layers.dense(h,1,name="logits")
         outputs = tf.sigmoid(logits,name="output")
-        return logits,outputs
+        return outputs
 
 def get_generator(noise_data,n_units,out_dim,reuse=False,alpha=0.01):
     '''
@@ -44,7 +43,7 @@ def get_generator(noise_data,n_units,out_dim,reuse=False,alpha=0.01):
 
         logits = tf.layers.dense(hidden1,out_dim,name="logits")
         outputs = tf.tanh(logits)
-        return logits,outputs
+        return outputs
 
 #训练用的参数    
 mnist = input_data.read_data_sets("/MNIST_data",one_hot=True)
@@ -55,7 +54,7 @@ g_units = 128
 d_units = 128
 #leaky ReLU参数
 alpha=0.01
-learning_rate=0.0005
+learning_rate=0.0015
 #label smoothing??
 smooth=0.1
 
@@ -64,11 +63,11 @@ tf.reset_default_graph()
 real_img,noise_data = get_inputs(img_size,noise_size)
 
 #generator
-g_logits,g_outputs = get_generator(noise_data,g_units,img_size)
+g_outputs = get_generator(noise_data,g_units,img_size)
 
 #discriminator
-d_logits_real,d_outputs_real = get_discriminator(real_img,d_units)
-d_logits_fake,d_outputs_fake = get_discriminator(g_outputs,d_units,
+d_outputs_real = get_discriminator(real_img,d_units)
+d_outputs_fake = get_discriminator(g_outputs,d_units,
 reuse=True)
 
 #Loss 1-smooth??
@@ -81,11 +80,12 @@ d_loss_real = tf.reduce_mean(tf.log(d_outputs_real)) *(1-smooth)
 #生成图片loss
 d_loss_fake =tf.reduce_mean(tf.log(1-d_outputs_fake))*(1-smooth)
 
-#总的discriminator loss
+#总的discriminator loss = -1/m * Σ(log(D(x)) +log(1-D(G())))
 d_loss = -(d_loss_fake +  d_loss_real)
 
-#generator loss
-g_loss = -tf.reduce_mean(tf.log(d_outputs_fake)) *(1-smooth)
+#generator loss = 1/m * Σ(log(1-D(G())))
+#这里使用-log(D(G()))替代原公式是为了在训练初期加大梯度信息
+g_loss = tf.reduce_mean(tf.log(1-d_outputs_fake)) *(1-smooth)
 
 
 #Optimizer
@@ -99,7 +99,7 @@ d_train_op = tf.train.AdamOptimizer(learning_rate).minimize(d_loss,var_list=d_va
 g_train_op = tf.train.AdamOptimizer(learning_rate).minimize(g_loss,var_list=g_var)
 
 #训练
-batch_size = 100
+batch_size = 50
 epochs = 300
 n_sample = 25
 samples = []
@@ -132,14 +132,10 @@ with tf.Session() as sess:
                 sess.run(g_train_op,feed_dict={noise_data:batch_noise})
 
 
-            train_loss_d = sess.run(d_loss,feed_dict={real_img:batch_images,
-                noise_data:batch_noise})
-            train_loss_d_real = sess.run(d_loss_real,feed_dict={
-                real_img:batch_images,noise_data:batch_noise})
-            train_loss_d_fake = sess.run(d_loss_fake,feed_dict={
-                real_img:batch_images,noise_data:batch_noise})
+            train_loss_d,train_loss_d_real,train_loss_d_fake,train_loss_g = sess.run(
+                [d_loss,d_loss_real,d_loss_fake,g_loss],feed_dict= {
+                    real_img:batch_images, noise_data:batch_noise})
 
-            train_loss_g = sess.run(g_loss,feed_dict={noise_data:batch_noise})
             result = sess.run(merge,feed_dict={real_img:batch_images,
                 noise_data:batch_noise})
             writer.add_summary(result,e)
@@ -149,8 +145,6 @@ with tf.Session() as sess:
               "Discriminator Loss: {:.4f}(Real: {:.4f} + Fake: {:.4f})...".format(train_loss_d, train_loss_d_real, train_loss_d_fake),
               "Generator Loss: {:.4f}".format(train_loss_g))
             sys.stdout.flush()
-            # 记录各类loss值
-            losses.append((train_loss_d, train_loss_d_real, train_loss_d_fake, train_loss_g))
 
             # 抽取样本后期进行观察
             sample_noise = np.random.uniform(-1, 1, size=(n_sample, noise_size))
@@ -171,16 +165,7 @@ with tf.Session() as sess:
 with open('train_samples.pkl', 'wb') as f:
     pickle.dump(samples, f)
  
-fig, ax = plt.subplots(figsize=(20,7))
-print(losses)
-losses = np.array(losses)
-plt.plot(losses.T[0], label='Discriminator Total Loss')
-plt.plot(losses.T[1], label='Discriminator Real Loss')
-plt.plot(losses.T[2], label='Discriminator Fake Loss')
-plt.plot(losses.T[3], label='Generator')
-plt.title("Training Losses")
-plt.legend()
-        
+       
 with open('train_samples.pkl', 'rb') as f:
     samples = pickle.load(f)
 
@@ -190,7 +175,7 @@ def view_samples(epoch, samples):
     samples为我们的采样结果
     """
     fig, axes = plt.subplots(figsize=(7,7), nrows=5, ncols=5, sharey=True, sharex=True)
-    for ax, img in zip(axes.flatten(), samples[epoch][1]): # 这里samples[epoch][1]代表生成的图像结果，而[0]代表对应的logits
+    for ax, img in zip(axes.flatten(), samples[epoch]): # 这里samples[epoch][1]代表生成的图像结果，而[0]代表对应的logits
         ax.xaxis.set_visible(False)
         ax.yaxis.set_visible(False)
         im = ax.imshow(img.reshape((28,28)), cmap='Greys_r')
@@ -203,7 +188,7 @@ _ = view_samples(-1, samples) # 显示最后一轮的outputs
 epoch_idx = [0, 5, 10, 20, 40, 60, 80, 100, 150, 250] # 一共300轮，不要越界
 show_imgs = []
 for i in epoch_idx:
-    show_imgs.append(samples[i][1])
+    show_imgs.append(samples[i])
 
 # 指定图片形状
 rows, cols = 10, 25
