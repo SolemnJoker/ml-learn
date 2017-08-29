@@ -11,7 +11,7 @@ def get_inputs(real_img_size,noise_size):
     noise_img = tf.placeholder(tf.float32,[None,noise_size],name="noise_image")
     return real_img,noise_img
 
-def get_discriminator(img,num_h,reuse=False,alpha=0.01):
+def discriminator(img,num_h,reuse=False,alpha=0.01):
     '''
     img:输入图像
     n_units:判别器隐层数
@@ -27,7 +27,7 @@ def get_discriminator(img,num_h,reuse=False,alpha=0.01):
         outputs = tf.sigmoid(logits,name="output")
         return outputs
 
-def get_generator(noise_data,n_units,out_dim,reuse=False,alpha=0.01):
+def gennerator(noise_data,n_units,out_dim,reuse=False,alpha=0.01):
     '''
     noise_data:输入的噪声数据，可以和out_dim不一样大
     n_units:生成器隐层数
@@ -63,11 +63,11 @@ tf.reset_default_graph()
 real_img,noise_data = get_inputs(img_size,noise_size)
 
 #generator
-g_outputs = get_generator(noise_data,g_units,img_size)
+g_outputs = gennerator(noise_data,g_units,img_size)
 
 #discriminator
-d_outputs_real = get_discriminator(real_img,d_units)
-d_outputs_fake = get_discriminator(g_outputs,d_units,
+d_outputs_real = discriminator(real_img,d_units)
+d_outputs_fake = discriminator(g_outputs,d_units,
 reuse=True)
 
 #Loss 1-smooth??
@@ -148,7 +148,7 @@ with tf.Session() as sess:
 
             # 抽取样本后期进行观察
             sample_noise = np.random.uniform(-1, 1, size=(n_sample, noise_size))
-            gen_samples = sess.run(get_generator(noise_data, g_units, img_size, reuse=True),
+            gen_samples = sess.run(gennerator(noise_data, g_units, img_size, reuse=True),
                                    feed_dict={noise_data: sample_noise})
             samples.append(gen_samples)
             epoch_end = time.clock()
