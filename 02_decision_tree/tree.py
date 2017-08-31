@@ -12,7 +12,7 @@ def calShannonEnt(dataset):
     for featVec in dataset:
         curLabel = featVec[-1]
         labelCount[curLabel] = labelCount.get(curLabel, 0) + 1
-        shannonEnt = 0.0
+    shannonEnt = 0.0
     for key in labelCount:
         prob = float(labelCount[key]) / dataSize
         shannonEnt -= prob * log(prob, 2)
@@ -30,9 +30,12 @@ def createDataset():
     labels = ['no surfacing', 'flippers', 'head']
     return dataset, labels
 
-# 划分子数据集
-
-
+'''
+划分子数据集
+axis:需要划分的属性
+value:类别
+retDataset:返回dataset中属性axis为value的子集
+'''
 def splitDataset(dataset, axis, value):
     retDataset = []
     for featVec in dataset:
@@ -82,9 +85,14 @@ def majorityCnt(classlist):
 def createTree(dataset, labels):
     curLabels = labels[:]
     classlist = [c[-1] for c in dataset]
+    #所有节点都属于同一类
     if classlist.count(classlist[0]) == len(classlist):
         return classlist[0]
+    #只剩一个数据
     if len(dataset[0]) == 1:
+        return majorityCnt(classlist)
+    #属性集为空
+    if len(labels) == 0:
         return majorityCnt(classlist)
     bestFeat = chooseBestFeat2Split(dataset)
     bestLabel = curLabels[bestFeat]
