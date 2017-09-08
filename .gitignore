@@ -1,9 +1,11 @@
 *.pyc
-<<<<<<< HEAD
-launch.json
-setting.json
-=======
 *.vscode
 launch.json
 settings.json
->>>>>>> 4e8e1338a6194249a49d92f14a7878e5e60731fc
+*.JK
+./checkpoints/
+checkpoints*
+gan_mnist
+MNIST_data
+fashion_MNIST_data
+

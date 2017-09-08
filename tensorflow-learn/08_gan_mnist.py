@@ -1,3 +1,4 @@
+#coding:utf-8
 import tensorflow as tf
 import tensorflow.examples.tutorials.mnist.input_data as input_data
 import numpy as np
@@ -46,8 +47,9 @@ def gennerator(noise_data,n_units,out_dim,reuse=False,alpha=0.01):
         return outputs
 
 #训练用的参数    
-mnist = input_data.read_data_sets("/MNIST_data",one_hot=True)
+mnist = input_data.read_data_sets("./fashion_MNIST_data",one_hot=True)
 img_size = mnist.train.images[0].shape[0]
+
 #噪声数据大小
 noise_size = 100
 g_units = 128
@@ -100,7 +102,7 @@ g_train_op = tf.train.AdamOptimizer(learning_rate).minimize(g_loss,var_list=g_va
 
 #训练
 batch_size = 50
-epochs = 500
+epochs = 300
 n_sample = 25
 samples = []
 losses = []
