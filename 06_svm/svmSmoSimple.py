@@ -1,17 +1,6 @@
 #-*- coding: UTF-8 -*-
 import random
 from numpy import *
-import matplotlib.pylab as plt
-
-def loadDataSet(filename):
-    dataset = []
-    labels = []
-    f = open(filename)
-    for line in f.readlines():
-        lineArr = line.split('\t')
-        dataset.append([float(lineArr[0]),float(lineArr[1])])
-        labels.append(float(lineArr[2]))
-    return dataset,labels
 
 def selectJrand(i,m):
     j = i
@@ -52,6 +41,7 @@ def smoSimple(dataset,labels,C,toler,maxIter):
         for i in range(m):
             # $w = \sum^n_{i=1} a_i y_i x_i$
             weight =  multiply(alphas,labelsMat).T * dataMat 
+            print multiply(alphas,labelsMat).shape,alphas.shape,labelsMat.shape,weight.shape,dataMat.shape
             fxi = weight*x(i).T + b
             #满足KKT条件：  
             #1.labels[i]*fxi>1  &&  alphas[i]==0  
@@ -80,6 +70,7 @@ def smoSimple(dataset,labels,C,toler,maxIter):
                 #计算b，当0<alpha<C时，由kkt条件，y1(wx1+b) =1
                 #b = y1 - wx1 ,将w用 \sum_{i=1}^N a_i y_i xi替换,
                 #最后简化为b^new = -E_1 - y_1K_{11}(a_1^{new} - a_1^{old}) - y_2K_{21}(a_2^{new} - a_2^{old})
+                #简化步骤参考http://blog.csdn.net/luoshixian099/article/details/51227754
                 b1 = -Ei - labels[i]*K(i,i)*(alphas[i] - alphaIold) -\
                  labels[j]*K(j,i)*(alphas[j] - alphaJold) + b
 
@@ -100,30 +91,5 @@ def smoSimple(dataset,labels,C,toler,maxIter):
             iter = 0
         print "iteration number: %d" % iter
     return alphas,b,weight
-
-dataMat,labelMat = loadDataSet("./06_svm/testSet.txt")
-a,b,w  = smoSimple(dataMat, labelMat, 0.5, 0.01, 10)
-print b,w
-
-def plotBestFit(dataset,labels,weights,b):
-    xcord = [[],[]];ycord=[[],[]]
-    n = shape(dataset)[0]
-    for i in range(n):
-        xcord[int(labels[i] == 1)].append(dataset[i][0])
-        ycord[int(labels[i] == 1)].append(dataset[i][1])
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.scatter(xcord[0],ycord[0],s = 30,c='red',marker='s')
-    ax.scatter(xcord[1],ycord[1],s = 30,c='blue')
-    x = arange(-1.0,10.0,0.1)
-    y = -(weights.item(0)*x + b.item(0)) /weights.item(1)
-    ax.plot(x,y)
-    plt.show()
-
-plotBestFit(dataMat,labelMat,w,b)
-
-
-
-
 
 
