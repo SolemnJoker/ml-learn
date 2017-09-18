@@ -90,6 +90,7 @@ def smoSimple(dataset,labels,C,toler,maxIter):
         else:
             iter = 0
         print "iteration number: %d" % iter
+    weight =  multiply(alphas,labelsMat).T * dataMat 
     return alphas,b,weight
 
 

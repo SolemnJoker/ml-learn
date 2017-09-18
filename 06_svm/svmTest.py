@@ -1,6 +1,7 @@
 from numpy import *
 import matplotlib.pylab as plt
-from svmSmoSimple import *
+import svmSmoSimple
+import svmPlattSmo
 
 def loadDataSet(filename):
     dataset = []
@@ -28,8 +29,13 @@ def plotBestFit(dataset,labels,weights,b):
     plt.show()
 
 dataMat,labelMat = loadDataSet("./06_svm/testSet.txt")
-a,b,w  = smoSimple(dataMat, labelMat, 0.5, 0.01, 10)
+a1,b1,w1  = svmSmoSimple.smoSimple(dataMat, labelMat, 1, 0.01, 10)
+plotBestFit(dataMat,labelMat,w1,b1)
+a,b,w  = svmPlattSmo.smoPlatt(dataMat, labelMat, 1, 0.2, 10)
 plotBestFit(dataMat,labelMat,w,b)
+print b1,w1
+print b,w
+
 
 
 
