@@ -5,7 +5,7 @@ from numpy import *
 def selectJrand(i,m):
     j = i
     while i == j:
-        j = random.randint(0,m)
+        j = int(random.uniform(0,m))
     return j
 
 def calAlphaLH(lableI,labelJ,alphaI,alphaJ,C):
@@ -41,7 +41,6 @@ def smoSimple(dataset,labels,C,toler,maxIter):
         for i in range(m):
             # $w = \sum^n_{i=1} a_i y_i x_i$
             weight =  multiply(alphas,labelsMat).T * dataMat 
-            print multiply(alphas,labelsMat).shape,alphas.shape,labelsMat.shape,weight.shape,dataMat.shape
             fxi = weight*x(i).T + b
             #满足KKT条件：  
             #1.labels[i]*fxi>1  &&  alphas[i]==0  
@@ -58,8 +57,8 @@ def smoSimple(dataset,labels,C,toler,maxIter):
                 j = selectJrand(i,m)
                 fxj = float(weight*x(j).T) + b
                 Ej = fxj - float(labels[j])
-                alphaJold = alphas[j]
-                alphaIold = alphas[i]
+                alphaJold = alphas[j].copy()
+                alphaIold = alphas[i].copy()
                 L,H = calAlphaLH(labels[i],labels[j],alphas[i],alphas[j],C)
                 eta = 2*K(i,j) - K(i,i) - K(j,j)
                 if eta>=0:print 'eta' ;continue

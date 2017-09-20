@@ -82,8 +82,8 @@ def innerLK(i,oS):
     if (Ei*oS.labels[i] > oS.toler and oS.alphas[i] > 0) or \
         (Ei *oS.labels[i] < -oS.toler  and oS.alphas[i] < oS.C):
         j,Ej = selectJE(oS,i,Ei)
-        alphaJold = oS.alphas[j]
-        alphaIold = oS.alphas[i]
+        alphaJold = oS.alphas[j].copy()
+        alphaIold = oS.alphas[i].copy()
         L,H = calAlphaLH(oS.labels[i],oS.labels[j],oS.alphas[i],oS.alphas[j],oS.C)
         eta = float(2*oS.K(i,j) - oS.K(i,i) - oS.K(j,j))
         if eta>=0:
