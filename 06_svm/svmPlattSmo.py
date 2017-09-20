@@ -25,7 +25,7 @@ class optStruct:
 def selectJrand(i,m):
     j = i
     while i == j:
-        j = random.randint(0,m)
+        j = int(random.uniform(0,m))
     return j
 
 def calAlphaLH(lableI,labelJ,alphaI,alphaJ,C):
@@ -57,6 +57,7 @@ def updateEk(oS,k):
     oS.eCache[k] = [1,calcEk(oS,k)]
 
 def selectJE(oS,i,Ei):
+    oS.eCache[i] = [1,Ei]
     maxJ = -1
     maxDeltaE = 0
     Ej = 0
@@ -105,7 +106,7 @@ def innerLK(i,oS):
         elif oS.alphas[j] > 0 and oS.alphas[j] < oS.C:
             oS.b = b2
         else:
-            oS.b = (b1+b2)/2
+            oS.b = (b1+b2)/2.0
         return 1
     return 0
         
@@ -124,7 +125,6 @@ def smoPlatt(dataset,labels,C,toler,maxIter):
             for i in range(oS.m):
                 alphaPairsChange += innerLK(i,oS)
                 print "fullSet, iter: %d i:%d, pairs changed %d" % (iter,i,alphaPairsChange)
-                sys.stdout.flush()
             iter +=1
         else:
             nonBoundIs = nonzero((oS.alphas > 0) * (oS.alphas < C))[0]
@@ -132,11 +132,9 @@ def smoPlatt(dataset,labels,C,toler,maxIter):
             for i in nonBoundIs:
                 alphaPairsChange += innerLK(i,oS)
                 print "non-bound, iter: %d i:%d, pairs changed %d" % (iter,i,alphaPairsChange)
-                sys.stdout.flush()
             iter +=1
         if enterSet:enterSet = False
         elif alphaPairsChange == 0:enterSet = True
     print "iteration number: %d" % iter
-    sys.stdout.flush()
     updateWeight(oS)
     return oS.alphas,oS.b,oS.weight
